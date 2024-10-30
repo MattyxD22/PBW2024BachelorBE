@@ -1,8 +1,34 @@
 import fetch from "node-fetch";
 
+export const getTeamupUserEvents = async( req: any, res: any) => {
+  const email = req.params.email;
+  const url2 = 'https://api.teamup.com/eqv4en/events?query=mathiasbc97@gmail.com'
+  const url = `${process.env.teamupUrl}${process.env.TEAMUP_CALENDARID}/events?query=${email}`;
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Teamup-Token": process.env.teamup as string,
+        Authorization: `Bearer ${process.env.TEAMUP_AUTH as string}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    res.status(200).json(data);
+  } catch (error: any) {
+    console.error("Error fetching events:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+}
+
 export const getTeamupEvents = async (req: any, res: any) => {
   const calendarId = req.params.calendarId;
-  const url = `${process.env.teamupUrl}${calendarId}/events`;
+  const url = `${process.env.teamupUrl}${process.env.TEAMUP_CALENDARID}/events`;
   try {
     const response = await fetch(url, {
       method: "GET",
@@ -80,6 +106,12 @@ export const getTeamupSubcalenders = async (req: any, res: any) => {
 export const getTeamupAuth = async (req: any, res: any) => {
   const url = `${process.env.teamupUrl}auth/tokens`;
   const teamup_api = process.env.teamup as string;
+
+  const bodyObj = JSON.stringify({
+    email: process.env.teamup_email as string,
+    password: process.env.teamup_pass as string,
+  })
+
   try {
     const response = await fetch(url, {
       method: "POST",
@@ -87,10 +119,7 @@ export const getTeamupAuth = async (req: any, res: any) => {
         "Teamup-Token": teamup_api,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        email: req.body.email,
-        password: req.body.password,
-      }),
+      body: bodyObj,
     });
 
     if (!response.ok) {

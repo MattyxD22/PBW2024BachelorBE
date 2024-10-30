@@ -1,7 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
-
+import cors from "cors"
 // Load environment variables from .env file
 dotenv.config();
 
@@ -10,6 +10,7 @@ import clickupRoutes from "./routes/clickupRoute";
 import teamupRoutes from "./routes/teamupRoute";
 
 const app = express();
+app.use(cors())
 const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());

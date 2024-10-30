@@ -4,14 +4,16 @@ import {
   getTeamupEvents,
   getTeamupAuth,
   getTeamupUsers,
-  getTeamupSubcalenders
+  getTeamupSubcalenders,
+  getTeamupUserEvents
 } from "../controllers/teamupController";
 
 
 // ---GET---
-router.get("/events/:calendarId", getTeamupEvents)
+router.get("/events", getTeamupEvents);
 router.get("/searchUser/:calendarId", getTeamupUsers);
-router.get("/subcalendars:calendarId", getTeamupSubcalenders)
+router.get("/subcalendars:calendarId", getTeamupSubcalenders);
+router.get("/userEvents/:email", getTeamupUserEvents);
 
 
 // ---POST---
