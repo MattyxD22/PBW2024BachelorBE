@@ -12,7 +12,7 @@ import {
 // ---GET---
 router.get("/events", getTeamupEvents);
 router.get("/searchUser/:calendarId", getTeamupUsers);
-router.get("/subcalendars:calendarId", getTeamupSubcalenders);
+router.get("/subcalendars", getTeamupSubcalenders);
 router.get("/userEvents/:email", getTeamupUserEvents);
 
 

@@ -1,9 +1,13 @@
 import fetch from "node-fetch";
+import {getCurrentWeek} from '../utils/helper-utils'
 
 export const getTeamupUserEvents = async( req: any, res: any) => {
   const email = req.params.email;
   const url2 = 'https://api.teamup.com/eqv4en/events?query=mathiasbc97@gmail.com'
-  const url = `${process.env.teamupUrl}${process.env.TEAMUP_CALENDARID}/events?query=${email}`;
+
+  const {startOfWeek, endOfWeek} = getCurrentWeek()
+
+  const url = `${process.env.teamupUrl}${process.env.TEAMUP_CALENDARID}/events?query=${email}&startDate=${startOfWeek}&endDate=${endOfWeek}&`;
   try {
     const response = await fetch(url, {
       method: "GET",
@@ -27,7 +31,6 @@ export const getTeamupUserEvents = async( req: any, res: any) => {
 }
 
 export const getTeamupEvents = async (req: any, res: any) => {
-  const calendarId = req.params.calendarId;
   const url = `${process.env.teamupUrl}${process.env.TEAMUP_CALENDARID}/events`;
   try {
     const response = await fetch(url, {
@@ -79,8 +82,7 @@ export const getTeamupUsers = async (req: any, res: any) => {
 
 
 export const getTeamupSubcalenders = async (req: any, res: any) => {
-  const calendarId = req.params.calendarId;
-  const url = `${process.env.teamupUrl}${calendarId}/subcalendars?includeInactive=false`;
+  const url = `${process.env.teamupUrl}${process.env.TEAMUP_CALENDARID}/subcalendars`;
   try {
     const response = await fetch(url, {
       method: "GET",

@@ -1,10 +1,10 @@
 import fetch from "node-fetch";
-
+import { extractTrackedTimeInfo} from "../utils/helper-utils"
 const CLICKUP_API_TOKEN = process.env.clickup as string;
 
 export const getClickUpTasksFromList = async (req: any, res: any) => {
-  const listID = req.params.listID;
-  const url = `${process.env.clickupUrl}v2/list/${listID}/task`;
+  const userEmail = req.params.email;
+  const url = `${process.env.clickupUrl}v2/list/${process.env.CLICKUP_LISTID}/task`;
 
   try {
     const response = await fetch(url, {
@@ -20,15 +20,34 @@ export const getClickUpTasksFromList = async (req: any, res: any) => {
     }
 
     const data = await response.json();
-    res.status(200).json(data);
+    const tasks = data.tasks || [];
+
+    // Process each task for tracked time entries
+    const userTrackedTime = (
+      await Promise.all(
+        tasks
+          .filter((task: any) =>
+            task.assignees && task.assignees.some((assignee: any) => assignee.email === userEmail)
+          )
+          .map(async (task: any) => {
+            const timeEntries = await getTaskTimeEntries(task.id);
+            return timeEntries.map((entry: any) => ({
+              
+              ...extractTrackedTimeInfo(entry), // Extracted time info
+              taskTitle: task.name
+            }));
+          })
+      )
+    ).flat();
+
+    res.status(200).json(userTrackedTime);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 };
 
 export const getClickupListUsers = async(req: any, res: any) => {
-  const listID = req.params.listID;
-  const url = `${process.env.clickupUrl}v2/list/${listID}/member`;
+  const url = `${process.env.clickupUrl}v2/list/${process.env.CLICKUP_LISTID}/member`;
   try {
     const response = await fetch(url, {
       method: "GET",
@@ -104,48 +123,30 @@ export const getClickupTaskWithTrackedTime = async (req: any, res: any) => {
   }
 };
 
-// parsing functions
+// Fetch tracked time entries for a specific task
+const getTaskTimeEntries = async (taskId: string) => {
+  const url = `${process.env.clickupUrl}v2/task/${taskId}/time`;
 
-// Function to extract tracked time information from task data
-const extractTrackedTimeInfo = (task: any) => {
-  if (task.time_spent && task.time_spent > 0) {
-    // Convert time_spent from milliseconds to hours and minutes
-    const totalMinutes = Math.floor(task.time_spent / 60000); // Convert ms to minutes
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-
-    const dateAdded = new Date(parseInt(task.date_created));
-
-    // Format the date to a readable format
-    const options: Intl.DateTimeFormatOptions = {
-      year:   'numeric',  
-      month:  'long',    
-      day:    'numeric',   
-      hour:   '2-digit',  
-      minute: '2-digit',
-      hour12: false,    
-    };
-    
-    const formattedDate = dateAdded.toLocaleString('dk-DA', options);
-
-    // Create a result object with extracted information
-    const result = {
-      taskId: task.id,
-      taskName: task.name,
-      dateAdded: formattedDate,
-      duration: {
-        hours: hours,
-        minutes: minutes,
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: CLICKUP_API_TOKEN,
+        "Content-Type": "application/json",
       },
-      loggedBy: task.creator.email, // Assuming the creator logged the time
-    };
+    });
 
-    return result;
-  } else {
-    return null; // No tracked time available
+    if (!response.ok) {
+      throw new Error(`Error fetching time entries for task ${taskId}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.data || [];
+  } catch (error) {
+    console.error(error);
+    return [];
   }
 };
-
 
 // TODO implement if oauth is needed
 // not needed for instances with personal token from clickup

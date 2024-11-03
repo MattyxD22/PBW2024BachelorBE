@@ -9,8 +9,8 @@ import {
 } from "../controllers/clickupController";
 
 // ---GET---
-router.get("/tasks/:listID", getClickUpTasksFromList);
-router.get("/members/:listID", getClickupListUsers);
+router.get("/tasks/:email", getClickUpTasksFromList);
+router.get("/members", getClickupListUsers);
 router.get("/getSingleTask/:taskID", getClickupSingleTask);
 router.get("/getSingleTaskTrackedTime/:taskID", getClickupTaskWithTrackedTime)
 
