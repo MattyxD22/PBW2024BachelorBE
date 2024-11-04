@@ -3,12 +3,15 @@ import {getCurrentWeek} from '../utils/helper-utils'
 
 export const getTeamupUserEvents = async( req: any, res: any) => {
   const email = req.params.email;
-  const url2 = 'https://api.teamup.com/eqv4en/events?query=mathiasbc97@gmail.com'
+  // Extract startDate and endDate from query parameters
+  const { startDate, endDate } = req.query;
 
-  const {startOfWeek, endOfWeek} = getCurrentWeek()  
+  // If startDate or endDate is not provided, use getCurrentWeek
+  const { startOfWeek, endOfWeek } = startDate && endDate
+    ? { startOfWeek: startDate, endOfWeek: endDate }
+    : getCurrentWeek();
   const url = `${process.env.teamupUrl}${process.env.TEAMUP_CALENDARID}/events?query=${email}&startDate=${startOfWeek}&endDate=${endOfWeek}`;
-  console.log(url);
-  
+
   try {
     const response = await fetch(url, {
       method: "GET",
@@ -24,7 +27,6 @@ export const getTeamupUserEvents = async( req: any, res: any) => {
     }
 
     const data = await response.json();
-    console.log('???: ', data);
     
     res.status(200).json(data);
   } catch (error: any) {

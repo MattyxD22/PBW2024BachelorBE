@@ -38,11 +38,7 @@ export const getClickUpTasksFromList = async (req: any, res: any) => {
             }));
           })
       )
-    ).flat();
-
-    console.log(userTrackedTime);
-    
-
+    ).flat(); 
     res.status(200).json(userTrackedTime);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -63,7 +59,6 @@ export const getClickupListUsers = async(req: any, res: any) => {
     if (!response.ok) {
       throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
-
     const data = await response.json();
     res.status(200).json(data);
   } catch (error: any) {

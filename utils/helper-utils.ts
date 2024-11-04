@@ -53,6 +53,7 @@ export const extractTrackedTimeInfo = (timeEntry: any) => {
         hours: hours,
         minutes: minutes,
       },
+      formattedDate: formattedDate,
       dateLogged: timeEntry.intervals[0].date_added,
       loggedBy: timeEntry.user.email,
       taskTitle: timeEntry.title
