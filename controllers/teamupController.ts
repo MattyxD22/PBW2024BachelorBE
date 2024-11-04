@@ -5,9 +5,10 @@ export const getTeamupUserEvents = async( req: any, res: any) => {
   const email = req.params.email;
   const url2 = 'https://api.teamup.com/eqv4en/events?query=mathiasbc97@gmail.com'
 
-  const {startOfWeek, endOfWeek} = getCurrentWeek()
-
-  const url = `${process.env.teamupUrl}${process.env.TEAMUP_CALENDARID}/events?query=${email}&startDate=${startOfWeek}&endDate=${endOfWeek}&`;
+  const {startOfWeek, endOfWeek} = getCurrentWeek()  
+  const url = `${process.env.teamupUrl}${process.env.TEAMUP_CALENDARID}/events?query=${email}&startDate=${startOfWeek}&endDate=${endOfWeek}`;
+  console.log(url);
+  
   try {
     const response = await fetch(url, {
       method: "GET",
@@ -23,6 +24,8 @@ export const getTeamupUserEvents = async( req: any, res: any) => {
     }
 
     const data = await response.json();
+    console.log('???: ', data);
+    
     res.status(200).json(data);
   } catch (error: any) {
     console.error("Error fetching events:", error.message);

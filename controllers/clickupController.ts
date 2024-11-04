@@ -40,6 +40,9 @@ export const getClickUpTasksFromList = async (req: any, res: any) => {
       )
     ).flat();
 
+    console.log(userTrackedTime);
+    
+
     res.status(200).json(userTrackedTime);
   } catch (error: any) {
     res.status(500).json({ error: error.message });

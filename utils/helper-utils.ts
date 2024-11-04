@@ -1,28 +1,28 @@
 export const getCurrentWeek = () => {
-    const currentDate = new Date();
-    const currentDay = currentDate.getDay();
-    
-    // Calculate the offset for Monday (1) and Sunday (0)
-    // Sunday (0) is treated as the last day of the week
-    const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; // Monday is the first day of the week
-    const sundayOffset = 0 - currentDay; // Sunday is the last day of the week
+  const currentDate = new Date();
+  const currentDay = currentDate.getDay();
+  
+  // Calculate the offset for Monday (1) and adjust for Sunday (7)
+  const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; // Monday is the first day of the week
+  const sundayOffset = currentDay === 0 ? 0 : 7 - currentDay;  // Sunday is the last day of the week
 
-    // Set the start of the week (Monday)
-    const startOfWeek = new Date(currentDate);
-    startOfWeek.setDate(currentDate.getDate() + mondayOffset);
+  // Set the start of the week (Monday)
+  const startOfWeek = new Date(currentDate);
+  startOfWeek.setDate(currentDate.getDate() + mondayOffset);
 
-    // Set the end of the week (Sunday)
-    const endOfWeek = new Date(currentDate);
-    endOfWeek.setDate(currentDate.getDate() + sundayOffset);
+  // Set the end of the week (Sunday)
+  const endOfWeek = new Date(currentDate);
+  endOfWeek.setDate(currentDate.getDate() + sundayOffset);
 
-    // Format date to 'YYYY-MM-DD'
-    const formatDate = (date: Date) => date.toISOString().split('T')[0];
+  // Format date to 'YYYY-MM-DD'
+  const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
-    return {
-        startOfWeek: formatDate(startOfWeek),
-        endOfWeek: formatDate(endOfWeek),
-    };
+  return {
+      startOfWeek: formatDate(startOfWeek),
+      endOfWeek: formatDate(endOfWeek),
+  };
 }
+
 
 // Function to extract tracked time information from task data
 export const extractTrackedTimeInfo = (timeEntry: any) => {
