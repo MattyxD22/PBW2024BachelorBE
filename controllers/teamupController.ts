@@ -27,8 +27,21 @@ export const getTeamupUserEvents = async( req: any, res: any) => {
     }
 
     const data = await response.json();
+    const userEvents = data.events.map((event:any) => {
+      return {
+        id: event.id,
+        subcalenderId: event.subcalendar_id,
+        all_day: event.all_day,
+        rrule: event.rrule,
+        title: event.title,
+        timezone: event.tz,
+        startDate: event.start_dt,
+        endDate: event.end_dt,
+        custom: event.custom
+      }
+    })
     
-    res.status(200).json(data);
+    res.status(200).json(userEvents);
   } catch (error: any) {
     console.error("Error fetching events:", error.message);
     res.status(500).json({ error: error.message });
@@ -78,7 +91,15 @@ export const getTeamupUsers = async (req: any, res: any) => {
     }
 
     const data = await response.json();
-    res.status(200).json(data);
+
+    const users = data.users.map((user:any)=>{
+      return {
+        email: user.members[0].email,
+        name: user.name
+      }
+    })
+
+    res.status(200).json(users);
   } catch (error: any) {
     console.error("Error fetching users:", error.message);
     res.status(500).json({ error: error.message });
@@ -103,7 +124,15 @@ export const getTeamupSubcalenders = async (req: any, res: any) => {
     }
 
     const data = await response.json();
-    res.status(200).json(data);
+    const subCalendars = data.subcalendars.map((calendar:any)=>{
+      return {
+        id: calendar.id,
+        name: calendar.name,
+        active: calendar.active,
+        color: calendar.color
+      }
+    })
+    res.status(200).json(subCalendars);
   } catch (error: any) {
     console.error("Error fetching sub calendars:", error.message);
     res.status(500).json({ error: error.message });

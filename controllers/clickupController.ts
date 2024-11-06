@@ -60,7 +60,13 @@ export const getClickupListUsers = async(req: any, res: any) => {
       throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
     const data = await response.json();
-    res.status(200).json(data);
+    const users = data.members.map((user: any) => {
+      return {
+        email: user.email,
+        name: user.username
+      };
+    });    
+    res.status(200).json(users);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
