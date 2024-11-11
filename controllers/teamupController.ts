@@ -3,13 +3,15 @@ import {getCurrentWeek} from '../utils/helper-utils'
 
 export const getTeamupUserEvents = async( req: any, res: any) => {
   const email = req.params.email;
-  // Extract startDate and endDate from query parameters
+  // Henter startDate og endDate fra forespørgelsesparametre
   const { startDate, endDate } = req.query;
 
-  // If startDate or endDate is not provided, use getCurrentWeek
+  // Hvis ingen startDate og endDate, default til getCurrentWeek
   const { startOfWeek, endOfWeek } = startDate && endDate
     ? { startOfWeek: startDate, endOfWeek: endDate }
     : getCurrentWeek();
+
+  // Henter events fra specifik kalender, identificeret ved TEAMUP_CALENDARID, baseret på mail, startDate og endDate
   const url = `${process.env.teamupUrl}${process.env.TEAMUP_CALENDARID}/events?query=${email}&startDate=${startOfWeek}&endDate=${endOfWeek}`;
 
   try {
@@ -26,6 +28,7 @@ export const getTeamupUserEvents = async( req: any, res: any) => {
       throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
 
+    // Henter data fra API'et og mapper events til et nyt format med relevante oplysninger
     const data = await response.json();
     const userEvents = data.events.map((event:any) => {
       return {
@@ -48,6 +51,7 @@ export const getTeamupUserEvents = async( req: any, res: any) => {
   }
 }
 
+// Henter alle events
 export const getTeamupEvents = async (req: any, res: any) => {
   const url = `${process.env.teamupUrl}${process.env.TEAMUP_CALENDARID}/events`;
   try {
@@ -72,7 +76,7 @@ export const getTeamupEvents = async (req: any, res: any) => {
   }
 };
 
-
+// Henter alle brugere på TeamUp
 export const getTeamupUsers = async (req: any, res: any) => {
   const calendarId = req.params.calendarId;
   const url = `${process.env.teamupUrl}${calendarId}/users`;
@@ -90,8 +94,8 @@ export const getTeamupUsers = async (req: any, res: any) => {
       throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
 
+    // Henter den alle brugere og mapper dem til nyt format med array for email og navn
     const data = await response.json();
-
     const users = data.users.map((user:any)=>{
       return {
         email: user.members[0].email,
@@ -106,7 +110,7 @@ export const getTeamupUsers = async (req: any, res: any) => {
   }
 };
 
-
+// Henter underkalendere for en specifik kalender fra TeamUp API'et.
 export const getTeamupSubcalenders = async (req: any, res: any) => {
   const url = `${process.env.teamupUrl}${process.env.TEAMUP_CALENDARID}/subcalendars`;
   try {
@@ -139,6 +143,8 @@ export const getTeamupSubcalenders = async (req: any, res: any) => {
   }
 };
 
+// Funktion som sender en POST-anmodning til TeamUp API'et for at få en autentificeringstoken
+// Anmodningen inkluderer loginoplysninger i JSON-format i body'en, samt en TeamUp API-token i headeren
 export const getTeamupAuth = async (req: any, res: any) => {
   const url = `${process.env.teamupUrl}auth/tokens`;
   const teamup_api = process.env.teamup as string;
@@ -164,10 +170,10 @@ export const getTeamupAuth = async (req: any, res: any) => {
 
     const data = await response.json();
 
-    process.env.TEAMUP_AUTH = data.auth_token; // Update the environment variable in memory
+    process.env.TEAMUP_AUTH = data.auth_token; 
     res.status(200).json({
       message: "Token stored successfully",
-      auth_token: data.auth_token, // Return the token, necessarry for postman. should be removed
+      auth_token: data.auth_token,
     });
   } catch (error: any) {
     console.error("Error fetching Teamup auth token:", error.message);

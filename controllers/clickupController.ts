@@ -2,10 +2,12 @@ import fetch from "node-fetch";
 import { extractTrackedTimeInfo} from "../utils/helper-utils"
 const CLICKUP_API_TOKEN = process.env.clickup as string;
 
+// Henter liste af opgaver for en bruger ud fra emails
 export const getClickUpTasksFromList = async (req: any, res: any) => {
   const userEmail = req.params.email;
   const url = `${process.env.clickupUrl}v2/list/${process.env.CLICKUP_LISTID}/task`;
 
+  // GET-anomdning for at hente opgaver fra ClickUp 
   try {
     const response = await fetch(url, {
       method: "GET",
@@ -19,10 +21,11 @@ export const getClickUpTasksFromList = async (req: any, res: any) => {
       throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
 
+    // Henter json data over opgaver eller en tom liste
     const data = await response.json();
     const tasks = data.tasks || [];
 
-    // Process each task for tracked time entries
+    // Kører alle asynkrone operationer samtidigt og venter til de er færdige inden der fortsættes. Henter opgaver og tiden for opgaver for den spicifikke email
     const userTrackedTime = (
       await Promise.all(
         tasks
@@ -33,18 +36,20 @@ export const getClickUpTasksFromList = async (req: any, res: any) => {
             const timeEntries = await getTaskTimeEntries(task.id);
             return timeEntries.map((entry: any) => ({
               
-              ...extractTrackedTimeInfo(entry), // Extracted time info
+              // Kopierer alle egenskaber fra et objekt og spreder dem ind i et nyt objekt
+              ...extractTrackedTimeInfo(entry), 
               taskTitle: task.name
             }));
           })
       )
-    ).flat(); 
+    ).flat(); // Flader alle tidsregistreringer ud i én liste
     res.status(200).json(userTrackedTime);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 };
 
+// Henter liste af brugere
 export const getClickupListUsers = async(req: any, res: any) => {
   const url = `${process.env.clickupUrl}v2/list/${process.env.CLICKUP_LISTID}/member`;
   try {
@@ -59,6 +64,7 @@ export const getClickupListUsers = async(req: any, res: any) => {
     if (!response.ok) {
       throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
+
     const data = await response.json();
     const users = data.members.map((user: any) => {
       return {
@@ -72,6 +78,7 @@ export const getClickupListUsers = async(req: any, res: any) => {
   }
 }
 
+// Henter en enkelt opgave ud fra taskID
 export const getClickupSingleTask = async(req: any, res: any) => {
   const taskID = req.params.taskID;
   const url = `${process.env.clickupUrl}v2/task/${taskID}`;
@@ -95,10 +102,10 @@ export const getClickupSingleTask = async(req: any, res: any) => {
   }
 }
 
+// Henter opgaver med tid
 export const getClickupTaskWithTrackedTime = async (req: any, res: any) => {
   const taskID = req.params.taskID;
   const url = `${process.env.clickupUrl}v2/task/${taskID}`;
-  
   try {
     const response = await fetch(url, {
       method: "GET",
@@ -114,10 +121,9 @@ export const getClickupTaskWithTrackedTime = async (req: any, res: any) => {
 
     const data = await response.json();
 
-    // Extract tracked time information
     const trackedTimeInfo = extractTrackedTimeInfo(data);
 
-    // Return the tracked time info along with the original task data
+    // Retunere info om tiden sammen med selve opgaven
     res.status(200).json({ 
       task: data, 
       trackedTimeInfo 
@@ -127,7 +133,7 @@ export const getClickupTaskWithTrackedTime = async (req: any, res: any) => {
   }
 };
 
-// Fetch tracked time entries for a specific task
+// Henter tiden for en specifik opgave
 const getTaskTimeEntries = async (taskId: string) => {
   const url = `${process.env.clickupUrl}v2/task/${taskId}/time`;
 
