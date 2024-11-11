@@ -46,7 +46,7 @@ export const extractTrackedTimeInfo = (timeEntry: any) => {
       minute: '2-digit',
       hour12: false,
     };
-    const formattedDate = dateLogged.toLocaleString('dk-DA', options);
+    const formattedDate = dateLogged.toLocaleString('en-US', options);
 
     return {
       duration: {
