@@ -1,20 +1,21 @@
+// Funktion til at hente starten og slutningen af den nuværende uge
 export const getCurrentWeek = () => {
   const currentDate = new Date();
   const currentDay = currentDate.getDay();
   
-  // Calculate the offset for Monday (1) and adjust for Sunday (7)
-  const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; // Monday is the first day of the week
-  const sundayOffset = currentDay === 0 ? 0 : 7 - currentDay;  // Sunday is the last day of the week
+  // Beregn offset for mandag (1) og juster for søndag (7)
+  const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; 
+  const sundayOffset = currentDay === 0 ? 0 : 7 - currentDay;
 
-  // Set the start of the week (Monday)
+  // Sætter starten af ugen til mandag
   const startOfWeek = new Date(currentDate);
   startOfWeek.setDate(currentDate.getDate() + mondayOffset);
 
-  // Set the end of the week (Sunday)
+  // Sæt slutningen af ugen til søndag
   const endOfWeek = new Date(currentDate);
   endOfWeek.setDate(currentDate.getDate() + sundayOffset);
 
-  // Format date to 'YYYY-MM-DD'
+  // Formater datoen til 'YYYY-MM-DD'
   const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
   return {
@@ -24,20 +25,19 @@ export const getCurrentWeek = () => {
 }
 
 
-// Function to extract tracked time information from task data
+// Funktion til at udtrække tid brugt på en opgave fra tidsregistreringsdata
 export const extractTrackedTimeInfo = (timeEntry: any) => {
-    // Return null if `timeEntry` or `intervals` is missing
     if (!timeEntry || !timeEntry.intervals || timeEntry.intervals.length === 0) return null;
 
-    // Calculate total tracked time in hours and minutes
-    const totalMinutes = Math.floor(timeEntry.time / 60000); // Convert ms to minutes
+    // Beregn samlet brugt tid i timer og minutter
+    const totalMinutes = Math.floor(timeEntry.time / 60000); // Konverter ms til minutter
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
 
-    // Use the `date_added` from the first interval as the logged date
+    // Brug `date_added` fra det første interval som den loggede dato
     const dateLogged = new Date(parseInt(timeEntry.intervals[0].date_added));
 
-    // Format the date
+    // Formater datoen
     const options: Intl.DateTimeFormatOptions = {
       year: 'numeric',
       month: 'long',
