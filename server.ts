@@ -9,6 +9,7 @@ dotenv.config();
 // Importer routes
 import clickupRoutes from "./routes/clickupRoute";
 import teamupRoutes from "./routes/teamupRoute";
+import globalRoutes from "./routes/globalRoute"
 
 // Opretter express applikation og accepterer forespørgsler fra andre domæner
 const app = express();
@@ -20,6 +21,7 @@ app.use(bodyParser.json());
 // Routes for ClickUp og TeamUp API'er
 app.use("/api/clickup", clickupRoutes);
 app.use("/api/teamup", teamupRoutes);
+app.use("/api/global", globalRoutes)
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
