@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../server'; // Adjust the import to point to your app's entry file
+import app from '../server';
 
 describe('GET /members', () => {
 
@@ -13,12 +13,11 @@ describe('GET /members', () => {
     });
 
     afterAll(() => {
-        // Close the server after tests
         server.close();
     });
 
     it('should return a list of members with status 200', async () => {
-        const response = await request(app).get('/api/clickup/members');  // Correct usage of 'get' on 'request'
+        const response = await request(app).get('/api/clickup/members'); 
         console.log(response.body);
 
         expect(response.status).toBe(200);
@@ -34,4 +33,18 @@ describe('GET /members', () => {
         const response = await request(app).get('/api/clickup/members');
         expect(Array.isArray(response.body)).toBe(true);
     });
+
+    it('should return task for a user using email and status 200', async () => {
+        const response = await request(app).get('/api/clickup/tasks/kasper.schmidt1@hotmail.com'); 
+        console.log(response.body);
+
+        expect(response.status).toBe(200);
+        expect(Array.isArray(response.body)).toBe(true);
+
+        if (response.body.length > 0) {
+            expect(response.body[0].loggedBy).toBe('kasper.schmidt1@hotmail.com');
+            expect(response.body[0]).toHaveProperty('taskTitle');
+        }
+    });
 });
+
