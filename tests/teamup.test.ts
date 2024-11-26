@@ -1,29 +1,41 @@
-// TODO fix jest så den kan håndtere flere filer på samme tid, bare gør brug af clickup.test.ts indtil videre
+import request from 'supertest';
+import app from '../server';
 
-// import request from 'supertest';
-// import app from '../server'; // Adjust the import to point to your app's entry file
+describe('TeamUp Authentication and User Events', () => {
+  let server: any;
+  let authToken: string;
 
-// describe('GET /userEvents', () => {
+  beforeAll(async () => {
+    // Start serveren på en ledig port (port 0)
+    server = app.listen(0, () => {
+      const address = server.address();
+      console.log(`Server running on port ${address.port}`);
+    });
 
-//     let server: any;
+    // Authenticate and store token
+    const authResponse = await request(app)
+      .post('/api/teamup/auth')
+      .set('Content-Type', 'application/json')
+      .set('Teamup-Token', process.env.teamup as string);
 
-//     beforeAll(() => {
-//         server = app.listen(0, () => {
-//             const address = server.address();
-//             console.log(`Server running on port ${address.port}`);
-//         });
-//     });
+    expect(authResponse.status).toBe(200);  // Ensure token is stored successfully
+    authToken = authResponse.body.auth_token;  // Save the auth token
+  });
 
-//     afterAll(() => {
-//         // Close the server after tests
-//         server.close();
-//     });
+  afterAll(() => {
+    return new Promise<void>((resolve) => {
+      server.close(() => resolve());
+    });
+  });
 
+  it('should return an array of events when authenticated', async () => {
+    // Use the token to make a request for user events
+    const response = await request(app)
+      .get('/api/teamup/userEvents/mathiasbc97@gmail.com')
+      .set('Authorization', `Bearer ${authToken}`);  // Include the token in the request header
 
-//     it('should return an array on provided email', async () => {
-//         const response = await request(app).get('/api/teamup/userEvents/mathiasbc97@gmail.com');
-//         console.log(response);
+    console.log(response.body);  // Log the response for debugging
+    expect(Array.isArray(response.body)).toBe(true);  // Check that the response is an array
+  });
 
-//         expect(Array.isArray(response.body)).toBe(true);
-//     });
-// });
+});
