@@ -46,5 +46,31 @@ describe('GET /members', () => {
             expect(response.body[0]).toHaveProperty('taskTitle');
         }
     });
+
+    it('should return task for a user using email and status 200', async () => {
+        const response = await request(app).get('/api/clickup/tasks/kasper.schmidt1@hotmail.com'); 
+        console.log(response.body);
+
+        expect(response.status).toBe(200);
+        expect(Array.isArray(response.body)).toBe(true);
+
+        if (response.body.length > 0) {
+            expect(response.body[0].loggedBy).not.toBe('mathiasbc97@gmail.com');
+            expect(response.body[0]).toHaveProperty('taskTitle');
+        }
+    });
+
+    it('Returns 400 if email does not exist in the members list', async () => {
+        const response = await request(app).get('/api/clickup/members');
+        console.log(response.body);
+    
+        expect(response.status).toBe(200);
+        expect(Array.isArray(response.body)).toBe(true);
+
+        const members = response.body;
+        const memberExists = members.some((member:any) => member.email === 'test@gmail.com');
+    
+        expect(memberExists).toBe(false);
+    });
 });
 
