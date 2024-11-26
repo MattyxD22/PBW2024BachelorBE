@@ -1,20 +1,34 @@
 import request from 'supertest';
 import app from '../server';
 
-describe('GET /members', () => {
+describe('ClickUp og Teamup tests', () => {
 
     let server: any;
+    let authToken : string;
 
-    beforeAll(() => {
+    beforeAll(async () => {
+        // Start serveren på en ledig port (port 0)
         server = app.listen(0, () => {
-            const address = server.address();
-            console.log(`Server running on port ${address.port}`);
+          const address = server.address();
+          console.log(`Server running on port ${address.port}`);
         });
-    });
+    
+        // Authenticate and store token
+        const authResponse = await request(app)
+          .post('/api/teamup/auth')
+          .set('Content-Type', 'application/json')
+          .set('Teamup-Token', process.env.teamup as string);
+    
+        expect(authResponse.status).toBe(200);  // Ensure token is stored successfully
+        authToken = authResponse.body.auth_token;  // Save the auth token
+      });
 
     afterAll(() => {
         server.close();
     });
+
+    // ------------------------------------ ClickUp Tests ------------------------------------
+
 
     it('should return a list of members with status 200', async () => {
         const response = await request(app).get('/api/clickup/members'); 
@@ -72,5 +86,37 @@ describe('GET /members', () => {
     
         expect(memberExists).toBe(false);
     });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ------------------------------------ TeamUp Tests ------------------------------------
+
+it('should return an array of events when authenticated', async () => {
+    // Use the token to make a request for user events
+    const response = await request(app)
+      .get('/api/teamup/userEvents/mathiasbc97@gmail.com')
+      .set('Authorization', `Bearer ${authToken}`);  // Include the token in the request header
+
+    console.log(response.body);  // Log the response for debugging
+    expect(Array.isArray(response.body)).toBe(true);  // Check that the response is an array
+  });
 });
+
+
+
+
 
