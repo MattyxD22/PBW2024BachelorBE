@@ -1,6 +1,7 @@
 import request from 'supertest';
 import app from '../server';
 
+
 describe('ClickUp og Teamup tests', () => {
 
     let server: any;
@@ -26,6 +27,16 @@ describe('ClickUp og Teamup tests', () => {
     afterAll(() => {
         server.close();
     });
+
+
+
+
+
+
+
+
+
+
 
     // ------------------------------------ ClickUp Tests ------------------------------------
 
@@ -97,12 +108,6 @@ describe('ClickUp og Teamup tests', () => {
 
 
 
-
-
-
-
-
-
 // ------------------------------------ TeamUp Tests ------------------------------------
 
 it('should return an array of events when authenticated', async () => {
@@ -114,9 +119,22 @@ it('should return an array of events when authenticated', async () => {
     console.log(response.body);  // Log the response for debugging
     expect(Array.isArray(response.body)).toBe(true);  // Check that the response is an array
   });
+
+
+it('should get subcalenders for users', async () => {
+    const response = await request(app)
+    .get('api.teamup.com/eqv4en/users')
+    .set('Authorization', `Bearer ${authToken}`);
+
+    console.log(response.body);
+
+    expect(response.status).toBe(200);
+    expect(response.body.access).toBe(true);
 });
 
 
+ 
+});
 
 
 
