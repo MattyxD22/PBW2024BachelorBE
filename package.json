@@ -16,7 +16,8 @@
     "expressjs": "^1.0.1",
     "node-fetch": "^2.7.0",
     "nodemon": "^3.1.7",
-    "odbc": "^2.4.9"
+    "odbc": "^2.4.9",
+    "sqlstring": "^2.3.3"
   },
   "devDependencies": {
     "@types/chai": "^5.0.1",
@@ -26,6 +27,7 @@
     "@types/mocha": "^10.0.9",
     "@types/node": "^22.7.9",
     "@types/node-fetch": "^2.6.11",
+    "@types/sqlstring": "^2.3.2",
     "@types/supertest": "^6.0.2",
     "chai": "^5.1.2",
     "chai-http": "^5.1.1",
