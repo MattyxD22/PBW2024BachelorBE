@@ -54,10 +54,12 @@ describe('ClickUp og Teamup tests', () => {
         }
     });
 
+
     it('should return an empty array if no members are found', async () => {
         const response = await request(app).get('/api/clickup/members');
         expect(Array.isArray(response.body)).toBe(true);
     });
+
 
     it('should return task for a user using email and status 200', async () => {
         const response = await request(app).get('/api/clickup/tasks/kasper.schmidt1@hotmail.com'); 
@@ -71,6 +73,7 @@ describe('ClickUp og Teamup tests', () => {
             expect(response.body[0]).toHaveProperty('taskTitle');
         }
     });
+
 
     it('should return task for a user using email and status 200', async () => {
         const response = await request(app).get('/api/clickup/tasks/kasper.schmidt1@hotmail.com'); 
@@ -118,23 +121,73 @@ it('should return an array of events when authenticated', async () => {
 
     console.log(response.body);  // Log the response for debugging
     expect(Array.isArray(response.body)).toBe(true);  // Check that the response is an array
+
+    expect(response.status).toBe(200);
   });
 
 
-it('should get subcalenders for users', async () => {
+  it('should get users', async () => {
     const response = await request(app)
-    .get('api.teamup.com/eqv4en/users')
-    .set('Authorization', `Bearer ${authToken}`);
-
+    .get(`/api/teamup/searchUser/eqv4en`)
+    .set(
+        {'Teamup-Token': process.env.teamup,
+        'Authorization': `Bearer ${authToken}`}
+    )
     console.log(response.body);
 
     expect(response.status).toBe(200);
-    expect(response.body.access).toBe(true);
+    expect(response.body.length).toBeGreaterThan(0);
+    console.log('Amount of users:', response.body.length);
 });
 
 
- 
+it('should get events', async () => {
+    const response = await request(app)
+    .get(`/api/teamup/events`)
+    .set(
+        {'Teamup-Token': process.env.teamup,
+        'Authorization': `Bearer ${authToken}`}
+    )
+    console.log(response.body);
+
+    expect(response.status).toBe(200);
+})
+
+it('Get subcalenders', async () => {
+    const response = await request(app)
+    .get(`/api/teamup/subcalendars`)
+    .set({
+        'Teamup-Token': process.env.teamup,
+        'Authorization': `Bearer ${authToken}`
+    })
+    console.log(response.body);
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true); 
+
+    if (response.body.length > 0) {
+        expect(response.body[0]).toHaveProperty('id'); 
+        expect(response.body[0]).toHaveProperty('name'); 
+    }
+});
+
+it('get events for user by email', async () => {
+    const response = await request(app)
+    .get(`/api/teamup/userEvents/kasper.schmidt1@hotmail.com`)
+    .set({
+        'Teamup-Token': process.env.teamup,
+        'Authorization': `Bearer ${authToken}`
+    })
+    console.log(response.body)
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+    
+    if (response.body.length > 0) {
+        expect(response.body[0]).toHaveProperty('title');
+        expect(response.body[0]).toHaveProperty('startDate');
+        expect(response.body[0]).toHaveProperty('endDate');
+    }
 });
 
 
 
+});
