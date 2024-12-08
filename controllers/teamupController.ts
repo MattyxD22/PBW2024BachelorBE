@@ -1,36 +1,33 @@
-import fetch from "node-fetch";
-import {getCurrentWeek} from '../utils/helper-utils'
+import * as teamupService from "../services/teamup.service";
+import { getCurrentWeek } from "../utils/helper-utils";
+import session from "express-session";
 
-export const getTeamupUserEvents = async( req: any, res: any) => {
+export const getTeamupUserEvents = async (req: any, res: any) => {
+  console.log("Cookie?: ", req.cookies);
   const email = req.params.email;
   // Henter startDate og endDate fra forespørgelsesparametre
   const { startDate, endDate } = req.query;
 
   // Hvis ingen startDate og endDate, default til getCurrentWeek
-  const { startOfWeek, endOfWeek } = startDate && endDate
-    ? { startOfWeek: startDate, endOfWeek: endDate }
-    : getCurrentWeek();
-
-  // Henter events fra specifik kalender, identificeret ved TEAMUP_CALENDARID, baseret på mail, startDate og endDate
-  const url = `${process.env.teamupUrl}${process.env.TEAMUP_CALENDARID}/events?query=${email}&startDate=${startOfWeek}&endDate=${endOfWeek}`;
-
+  const { startOfWeek, endOfWeek } =
+    startDate && endDate
+      ? { startOfWeek: startDate, endOfWeek: endDate }
+      : getCurrentWeek();
   try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Teamup-Token": process.env.teamup as string,
-        Authorization: `Bearer ${process.env.TEAMUP_AUTH as string}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status} ${response.statusText}`);
-    }
+    const response = await teamupService.fetchTeamupUserEvents(
+      email,
+      startOfWeek,
+      endOfWeek
+    );
 
     // Henter data fra API'et og mapper events til et nyt format med relevante oplysninger
-    const data = await response.json();
-    const userEvents = data.events.map((event:any) => {
+    const data = await response;
+    // hvis der er en fejl, check om data objektet har en "ok" property og i så fald, se om den er false
+    if (data.error) {
+      throw new Error(`Error: ${data.status} ${data.statusText}`);
+    }
+
+    const userEvents = data.events.map((event: any) => {
       return {
         id: event.id,
         subcalenderId: event.subcalendar_id,
@@ -40,36 +37,11 @@ export const getTeamupUserEvents = async( req: any, res: any) => {
         timezone: event.tz,
         startDate: event.start_dt,
         endDate: event.end_dt,
-        custom: event.custom
-      }
-    })
-    
-    res.status(200).json(userEvents);
-  } catch (error: any) {
-    console.error("Error fetching events:", error.message);
-    res.status(500).json({ error: error.message });
-  }
-}
-
-// Henter alle events
-export const getTeamupEvents = async (req: any, res: any) => {
-  const url = `${process.env.teamupUrl}${process.env.TEAMUP_CALENDARID}/events`;
-  try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Teamup-Token": process.env.teamup as string,
-        Authorization: `Bearer ${process.env.TEAMUP_AUTH as string}`,
-        "Content-Type": "application/json",
-      },
+        custom: event.custom,
+      };
     });
 
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    res.status(200).json(data);
+    res.status(200).json(userEvents);
   } catch (error: any) {
     console.error("Error fetching events:", error.message);
     res.status(500).json({ error: error.message });
@@ -78,30 +50,20 @@ export const getTeamupEvents = async (req: any, res: any) => {
 
 // Henter alle brugere på TeamUp
 export const getTeamupUsers = async (req: any, res: any) => {
-  const calendarId = req.params.calendarId;
-  const url = `${process.env.teamupUrl}${calendarId}/users`;
   try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Teamup-Token": process.env.teamup as string,
-        Authorization: `Bearer ${process.env.TEAMUP_AUTH as string}`,
-        "Content-Type": "application/json",
-      },
-    });
+    // Henter den alle brugere og mapper dem til nyt format med array for email og navn
+    const data = await teamupService.fetchTeamupUsers(req.params.calendarId);
 
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status} ${response.statusText}`);
+    if (data.error) {
+      throw new Error(`Error: ${data.status} ${data.statusText}`);
     }
 
-    // Henter den alle brugere og mapper dem til nyt format med array for email og navn
-    const data = await response.json();
-    const users = data.users.map((user:any)=>{
+    const users = data.users.map((user: any) => {
       return {
         email: user.members[0].email,
-        name: user.name
-      }
-    })
+        name: user.name,
+      };
+    });
 
     res.status(200).json(users);
   } catch (error: any) {
@@ -112,30 +74,21 @@ export const getTeamupUsers = async (req: any, res: any) => {
 
 // Henter underkalendere for en specifik kalender fra TeamUp API'et.
 export const getTeamupSubcalenders = async (req: any, res: any) => {
-  const url = `${process.env.teamupUrl}${process.env.TEAMUP_CALENDARID}/subcalendars`;
   try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Teamup-Token": process.env.teamup as string,
-        Authorization: `Bearer ${process.env.TEAMUP_AUTH as string}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const data = await teamupService.fetchTeamupSubCalendars();
 
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status} ${response.statusText}`);
+    if (data.error) {
+      throw new Error(`Error: ${data.status} ${data.statusText}`);
     }
 
-    const data = await response.json();
-    const subCalendars = data.subcalendars.map((calendar:any)=>{
+    const subCalendars = data.subcalendars.map((calendar: any) => {
       return {
         id: calendar.id,
         name: calendar.name,
         active: calendar.active,
-        color: calendar.color
-      }
-    })
+        color: calendar.color,
+      };
+    });
     res.status(200).json(subCalendars);
   } catch (error: any) {
     console.error("Error fetching sub calendars:", error.message);
@@ -152,7 +105,7 @@ export const getTeamupAuth = async (req: any, res: any) => {
   const bodyObj = JSON.stringify({
     email: process.env.teamup_email as string,
     password: process.env.teamup_pass as string,
-  })
+  });
 
   try {
     const response = await fetch(url, {
@@ -169,8 +122,8 @@ export const getTeamupAuth = async (req: any, res: any) => {
     }
 
     const data = await response.json();
+    process.env.TEAMUP_AUTH = data.auth_token;
 
-    process.env.TEAMUP_AUTH = data.auth_token; 
     res.status(200).json({
       message: "Token stored successfully",
       auth_token: data.auth_token,
