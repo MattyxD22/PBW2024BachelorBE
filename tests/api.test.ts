@@ -74,7 +74,6 @@ describe('ClickUp og Teamup tests', () => {
         }
     });
 
-
     it('should return task for a user using email and status 200', async () => {
         const response = await request(app).get('/api/clickup/tasks/kasper.schmidt1@hotmail.com'); 
         console.log(response.body);
@@ -102,6 +101,32 @@ describe('ClickUp og Teamup tests', () => {
     });
 
 
+it('Should return a singe task with tracked time', async () => {
+    const response = await request(app).get('/api/clickup/getSingleTaskTrackedTime/86969tc88');
+    console.log(response.body);
+
+    expect(response.status).toBe(200);
+
+    expect(response.body).toHaveProperty('task');
+    expect(response.body).toHaveProperty('trackedTimeInfo');
+
+    const task = response.body.task;
+    expect(task).toHaveProperty('id');
+    expect(task).toHaveProperty('name');
+
+    if (task.description) {
+        expect(typeof task.description).toBe('string');
+    }
+})
+
+it('should return 401 if the ClickUp API token is incorrect', async () => {
+    process.env.CLICKUP_API_TOKEN = 'invalid-token';
+    
+    const response = await request(app).get('/api/clickup/getSingleTaskTrackedTime/86969tc88');
+    
+    expect(response.status).toBe(401); 
+    expect(response.body).toHaveProperty('error', 'Authentication failed');
+  });
 
 
 
