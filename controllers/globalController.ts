@@ -1,46 +1,35 @@
-import * as odbc from "odbc";
+import * as globalService from "../services/global.service";
 import * as sqlString from "sqlstring";
-
-const DSN = "msAccess"; // Replace with the DSN name you set up earlier
 
 // Function to update or insert data into MS Access
 const updateMSAccessDatabase = async (data: any) => {
   try {
-    const connection = await odbc.connect(`DSN=${DSN}`);
-
     // Loop through the data array and process each entry
     for (const record of data) {
       const safeEmail = sqlString.escape(record.userEmail);
       const query = `SELECT * FROM UserTable WHERE email = ${safeEmail}`;
+      const response = await globalService.getAllAccess(query);
 
-      const result = await connection.query(query);
+      if (!response) {
+        throw new Error("No response from ms access");
+      }
 
-      console.log(result.length);
-      if (result.length > 0) {
+      if (response.length > 0) {
         console.log("user exists");
         record.userTasks.forEach(async (task: any) => {
           const safeFormattedDate = sqlString.escape(task.formattedDate);
           const safeTaskTitle = sqlString.escape(task.taskTitle);
+          const query = `INSERT INTO UserTaskTable (email, taskDate, taskTitle) VALUES (${safeEmail}, ${safeFormattedDate}, ${safeTaskTitle})`;
 
-          const insertTask = `INSERT INTO UserTaskTable (email, taskDate, taskTitle) VALUES (${safeEmail}, ${safeFormattedDate}, ${safeTaskTitle})`;
-          try {
-            await connection.query(insertTask);
-          } catch (err) {
-            console.error("Error inserting task:", err);
-          }
+          await globalService.createTaskRecord(query);
         });
       } else {
         console.log("user doesnt exist");
-        const insertQuery = `INSERT INTO UserTable (email) VALUES (${safeEmail})`;
-        try {
-          await connection.query(insertQuery);
-        } catch (err) {
-          console.error("Error inserting task:", err);
-        }
+        const query = `INSERT INTO UserTable (email) VALUES (${safeEmail})`;
+        await globalService.createUserRecord(query);
       }
     }
 
-    await connection.close();
     console.log("Database operations completed successfully.");
   } catch (error: any) {
     console.error("Error updating the database:", error.message);
