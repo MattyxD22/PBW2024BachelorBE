@@ -26,6 +26,7 @@ export const getClickUpTasksFromList = async (req: any, res: any) => {
               // Kopierer alle egenskaber fra et objekt og spreder dem ind i et nyt objekt
               ...extractTrackedTimeInfo(entry),
               taskTitle: task.name,
+              clickupTaskID: task.id,
             }));
           })
       )

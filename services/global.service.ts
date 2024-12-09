@@ -1,4 +1,3 @@
-import { query } from "express";
 import * as odbc from "odbc";
 
 const DSN = "msAccess"; // Replace with the DSN name you set up earlier
@@ -32,17 +31,7 @@ export const getAllAccess = async (query: string) => {
   }
 };
 
-export const createTaskRecord = async (query: string) => {
-  try {
-    const connection = await odbc.connect(`DSN=${DSN}`);
-    await connection.query(query);
-    await connection.close();
-  } catch (error: any) {
-    throw new Error(error.message);
-  }
-};
-
-export const createUserRecord = async (query: string) => {
+export const sendQuery = async (query: string) => {
   try {
     const connection = await odbc.connect(`DSN=${DSN}`);
     await connection.query(query);
