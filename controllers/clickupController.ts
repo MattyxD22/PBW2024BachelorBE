@@ -9,6 +9,8 @@ export const getClickUpTasksFromList = async (req: any, res: any) => {
     const data = await clickupService.fetchClickupTasksFromList();
     const tasks = data.tasks || [];
 
+    console.log(tasks);
+
     // Kører alle asynkrone operationer samtidigt og venter til de er færdige inden der fortsættes. Henter opgaver og tiden for opgaver for den spicifikke email
     const userTrackedTime = (
       await Promise.all(
@@ -27,6 +29,7 @@ export const getClickUpTasksFromList = async (req: any, res: any) => {
               ...extractTrackedTimeInfo(entry),
               taskTitle: task.name,
               clickupTaskID: task.id,
+              email: userEmail,
             }));
           })
       )

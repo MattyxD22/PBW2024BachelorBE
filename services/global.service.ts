@@ -24,6 +24,8 @@ export const getAllAccess = async (query: string) => {
       length: rows.length,
     };
 
+    console.log("done: ", returnObj);
+
     await connection.close();
     return returnObj;
   } catch (error: any) {

@@ -1,5 +1,6 @@
 import * as globalService from "../services/global.service";
 import * as sqlString from "sqlstring";
+import { formatDateForAccess } from "../utils/helper-utils";
 
 // Function to update or insert data into MS Access
 const updateMSAccessDatabase = async (data: any) => {
@@ -49,79 +50,107 @@ async function getUserID(safeEmail: string) {
 
 async function handleUserEvents(userID: number, userEvents: any[]) {
   for (const event of userEvents) {
-    const safeStartDate = sqlString.escape(event.startDate);
-    const safeEndDate = sqlString.escape(event.endDate);
+    console.log(event);
+
+    const isoStartDate = formatDateForAccess(event.startDate);
+    const isoStartTime = event.startTime; // Ensure proper formatting if needed
+    const isoEndDate = formatDateForAccess(event.endDate);
+    const isoEndTime = event.endTime; // Ensure proper formatting if needed
     const safeSubCalendarName = sqlString.escape(event.subCalendarName);
 
-    const eventExists = await checkIfEventExists(userID, safeStartDate);
+    const eventExists = await checkIfEventExists(
+      userID,
+      isoStartDate,
+      isoStartTime
+    );
 
     if (eventExists) {
       console.log(
-        `Updating event for user: ${userID}  ${safeStartDate}, ${safeEndDate}, ${event.eventHours}`
+        `Updating event for user: ${userID}, ${isoStartDate} ${isoStartTime} - ${isoEndDate} ${isoEndTime}`
       );
       await updateEvent(
         userID,
-        safeStartDate,
-        safeEndDate,
+        isoStartDate,
+        isoStartTime,
+        isoEndDate,
+        isoEndTime,
         event.eventHours,
-        safeSubCalendarName
+        event.subCalendarName
       );
     } else {
       console.log(`Inserting event for user: ${userID}`);
       await insertEvent(
         userID,
-        safeStartDate,
-        safeEndDate,
+        isoStartDate,
+        isoStartTime,
+        isoEndDate,
+        isoEndTime,
         event.eventHours,
-        safeSubCalendarName
+        event.subCalendarName
       );
     }
   }
 }
 
-async function checkIfEventExists(userID: number, safeStartDate: string) {
-  const eventCheckQuery = `SELECT * FROM userEvents WHERE userID = ${userID} AND startDate = ${safeStartDate}`;
+async function checkIfEventExists(
+  userID: number,
+  safeStartDate: string,
+  safeStartTime: string
+) {
+  const eventCheckQuery = `
+    SELECT * FROM userEvents 
+    WHERE userID = ${userID} AND startDate = ${safeStartDate} AND startTime = ${safeStartTime}
+  `;
   const eventResponse = await globalService.getAllAccess(eventCheckQuery);
   return eventResponse.length > 0;
 }
 
-async function updateEvent(
+export const updateEvent = async (
   userID: number,
-  safeStartDate: string,
-  safeEndDate: string,
+  isoStartDate: string,
+  isoStartTime: string,
+  isoEndDate: string,
+  isoEndTime: string,
   eventHours: string,
   safeSubCalendarName: string
-) {
-  try {
-    const updateEventQuery = `
-  UPDATE userEvents 
-  SET endDate = ${safeEndDate}, eventHours = ${sqlString.escape(
-      eventHours
-    )} , safeSubCalendarName = ${safeSubCalendarName}
-  WHERE userID = ${userID} AND startDate = ${safeStartDate}
-
+) => {
+  const updateEventQuery = `
+    UPDATE userEvents 
+    SET 
+      endDate = ${sqlString.escape(isoEndDate)}, 
+      endTime = ${sqlString.escape(isoEndTime)}, 
+      eventHours = ${sqlString.escape(eventHours)}, 
+      subCalendarName = ${safeSubCalendarName}
+    WHERE userID = ${userID} AND startDate = ${sqlString.escape(
+    isoStartDate
+  )} AND startTime = ${sqlString.escape(isoStartTime)}
   `;
-    await globalService.sendQuery(updateEventQuery);
-  } catch (error: any) {
-    throw new Error(error);
-  }
-}
+  await globalService.sendQuery(updateEventQuery);
+};
 
-async function insertEvent(
+export const insertEvent = async (
   userID: number,
-  safeStartDate: string,
-  safeEndDate: string,
+  isoStartDate: string,
+  isoStartTime: string,
+  isoEndDate: string,
+  isoEndTime: string,
   eventHours: string,
   safeSubCalendarName: string
-) {
+) => {
   const insertEventQuery = `
-    INSERT INTO userEvents (userID, startDate, endDate, eventHours, subCalendarName) 
-    VALUES (${userID}, ${safeStartDate}, ${safeEndDate}, ${sqlString.escape(
-    eventHours
-  )}, ${safeSubCalendarName})
+    INSERT INTO userEvents (userID, startDate, startTime, endDate, endTime, eventHours, subCalendarName) 
+    VALUES (
+      ${userID}, 
+      ${sqlString.escape(isoStartDate)}, 
+      ${sqlString.escape(isoStartTime)}, 
+      ${sqlString.escape(isoEndDate)}, 
+      ${sqlString.escape(isoEndTime)}, 
+      ${sqlString.escape(eventHours)}, 
+      ${safeSubCalendarName}
+    )
   `;
   await globalService.sendQuery(insertEventQuery);
-}
+};
 
 async function handleUserTasks(userID: number, userTasks: any[]) {
   for (const task of userTasks) {
