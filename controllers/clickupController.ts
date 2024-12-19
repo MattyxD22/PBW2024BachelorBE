@@ -9,8 +9,6 @@ export const getClickUpTasksFromList = async (req: any, res: any) => {
     const data = await clickupService.fetchClickupTasksFromList();
     const tasks = data.tasks || [];
 
-    console.log(tasks);
-
     // Kører alle asynkrone operationer samtidigt og venter til de er færdige inden der fortsættes. Henter opgaver og tiden for opgaver for den spicifikke email
     const userTrackedTime = (
       await Promise.all(
@@ -95,26 +93,3 @@ const getTaskTimeEntries = async (taskID: string) => {
     return [];
   }
 };
-
-// TODO implement if oauth is needed
-// not needed for instances with personal token from clickup
-// export const getClickupAuthToken = async (req: any, res: any) => {
-//   const url = `${process.env.clickupUrl}v2/user`;
-
-//   try {
-//     const resp = await fetch(url, {
-//       method: "GET",
-//       headers: {
-//         Authorization: process.env.clickup as string,
-//       },
-//     });
-
-//     const data = await resp.text();
-
-//     process.env.CLICKUP_AUTH = data.
-
-//     console.log(data);
-//   } catch (error: any) {
-//     res.json({ error: 500, message: error.message });
-//   }
-// };

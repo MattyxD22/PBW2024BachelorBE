@@ -10,9 +10,8 @@ const updateMSAccessDatabase = async (data: any) => {
       const safeUserName = sqlString.escape(record.userName);
       let userID = -1;
       userID = await getUserID(safeEmail);
-      console.log("returned userID: ", userID);
 
-      if (userID !== -1) {
+      if (userID && userID !== -1) {
         console.log("user exists");
 
         // Handle user events
@@ -50,19 +49,21 @@ async function getUserID(safeEmail: string) {
 
 async function handleUserEvents(userID: number, userEvents: any[]) {
   for (const event of userEvents) {
-    console.log(event);
-
     const isoStartDate = formatDateForAccess(event.startDate);
     const isoStartTime = event.startTime; // Ensure proper formatting if needed
     const isoEndDate = formatDateForAccess(event.endDate);
     const isoEndTime = event.endTime; // Ensure proper formatting if needed
     const safeSubCalendarName = sqlString.escape(event.subCalendarName);
 
+    console.log("here 1");
+
     const eventExists = await checkIfEventExists(
       userID,
       isoStartDate,
       isoStartTime
     );
+
+    console.log("here 2");
 
     if (eventExists) {
       console.log(
@@ -168,7 +169,12 @@ async function handleUserTasks(userID: number, userTasks: any[]) {
 
 async function insertNewUser(safeEmail: string, safeUserName: string) {
   const insertUserQuery = `INSERT INTO UserTable (email, userName) VALUES (${safeEmail}, ${safeUserName})`;
+
+  console.log("b ", safeEmail, safeUserName, insertUserQuery);
+
   const userResponse: any = await globalService.sendQuery(insertUserQuery);
+
+  console.log("a");
 
   if (userResponse.insertId) {
     return userResponse.insertId; // Return the new userID
@@ -191,86 +197,3 @@ export const exportCSV = async (req: any, res: any) => {
   }
 };
 
-// import * as globalService from "../services/global.service";
-// import * as sqlString from "sqlstring";
-
-// // Function to update or insert data into MS Access
-// const updateMSAccessDatabase = async (data: any) => {
-//   try {
-//     for (const record of data) {
-//       console.log(record);
-
-//       const safeEmail = sqlString.escape(record.userEmail);
-//       const query = `SELECT * FROM UserTable WHERE email = ${safeEmail}`;
-//       const response = await globalService.getAllAccess(query);
-
-//       if (!response) {
-//         throw new Error("No response from ms access");
-//       }
-
-//       if (response.length > 0) {
-//         console.log("User exists");
-
-//         for (const task of record.userTasks) {
-//           const safeFormattedDate = sqlString.escape(task.formattedDate);
-//           const safeTaskTitle = sqlString.escape(task.taskTitle);
-
-//           // Check if the task already exists
-//           const taskCheckQuery = `
-//             SELECT * FROM userTasks
-//             WHERE email = ${safeEmail} AND taskDate = ${safeFormattedDate} AND taskTitle = ${safeTaskTitle}
-//           `;
-//           const taskResponse = await globalService.getAllAccess(taskCheckQuery);
-
-//           if (taskResponse.length > 0) {
-//             // Update the task if necessary
-//             console.log(
-//               `Task already exists for ${safeEmail} on ${task.formattedDate}`
-//             );
-//             if (task.needsUpdate) {
-//               const updateQuery = `
-//                 UPDATE userTasks
-//                 SET timeSpent = ${sqlString.escape(task.timeSpent)}
-//                 WHERE email = ${safeEmail} AND taskDate = ${safeFormattedDate} AND taskTitle = ${safeTaskTitle}
-//               `;
-//               await globalService.updateRecord(updateQuery);
-//             }
-//           } else {
-//             // Insert the task if it doesn't exist
-//             const insertQuery = `
-//               INSERT INTO userTasks (email, taskDate, taskTitle, timeSpent)
-//               VALUES (${safeEmail}, ${safeFormattedDate}, ${safeTaskTitle}, ${sqlString.escape(
-//               task.timeSpent
-//             )})
-//             `;
-//             await globalService.createTaskRecord(insertQuery);
-//           }
-//         }
-//       } else {
-//         console.log("User doesn't exist");
-//         const insertUserQuery = `INSERT INTO UserTable (email) VALUES (${safeEmail})`;
-//         await globalService.createUserRecord(insertUserQuery);
-//       }
-//     }
-
-//     console.log("Database operations completed successfully.");
-//   } catch (error: any) {
-//     console.error("Error updating the database:", error.message);
-//     throw error;
-//   }
-// };
-
-// export const exportCSV = async (req: any, res: any) => {
-//   try {
-//     const jsonData = req.body;
-//     // Process the data
-//     await updateMSAccessDatabase(jsonData);
-
-//     res
-//       .status(200)
-//       .json({ Status: 200, Message: "Data successfully processed" });
-//   } catch (error: any) {
-//     console.error("Error processing data:", error.message);
-//     res.status(500).json({ error: error.message });
-//   }
-// };

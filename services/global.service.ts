@@ -23,9 +23,6 @@ export const getAllAccess = async (query: string) => {
       response: rows,
       length: rows.length,
     };
-
-    console.log("done: ", returnObj);
-
     await connection.close();
     return returnObj;
   } catch (error: any) {
@@ -36,8 +33,9 @@ export const getAllAccess = async (query: string) => {
 export const sendQuery = async (query: string) => {
   try {
     const connection = await odbc.connect(`DSN=${DSN}`);
-    await connection.query(query);
+    const result = await connection.query(query);
     await connection.close();
+    return result;
   } catch (error: any) {
     throw new Error(error.message);
   }

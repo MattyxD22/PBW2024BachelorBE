@@ -3,7 +3,6 @@ import { getCurrentWeek } from "../utils/helper-utils";
 import session from "express-session";
 
 export const getTeamupUserEvents = async (req: any, res: any) => {
-  console.log("Cookie?: ", req.cookies);
   const email = req.params.email;
   // Henter startDate og endDate fra forespørgelsesparametre
   const { startDate, endDate } = req.query;
