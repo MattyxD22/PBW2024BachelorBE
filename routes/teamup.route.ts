@@ -6,7 +6,7 @@ import {
   getTeamupUsers,
   getTeamupSubcalenders,
   getTeamupUserEvents
-} from "../controllers/teamupController";
+} from "../controllers/teamup.controller";
 
 // ---GET---
 router.get("/searchUser/:calendarId", getTeamupUsers);

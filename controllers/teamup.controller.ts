@@ -98,37 +98,17 @@ export const getTeamupSubcalenders = async (req: any, res: any) => {
 // Funktion som sender en POST-anmodning til TeamUp API'et for at få en autentificeringstoken
 // Anmodningen inkluderer loginoplysninger i JSON-format i body'en, samt en TeamUp API-token i headeren
 export const getTeamupAuth = async (req: any, res: any) => {
-  const url = `${process.env.teamupUrl}auth/tokens`;
-  const teamup_api = process.env.teamup as string;
-
-  const bodyObj = JSON.stringify({
-    email: process.env.teamup_email as string,
-    password: process.env.teamup_pass as string,
-  });
-
   try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Teamup-Token": teamup_api,
-        "Content-Type": "application/json",
-      },
-      body: bodyObj,
-    });
+    const response = await teamupService.fetchTeamupAuth();
 
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    process.env.TEAMUP_AUTH = data.auth_token;
+    process.env.TEAMUP_AUTH = response.auth_token;
 
     res.status(200).json({
       message: "Token stored successfully",
-      auth_token: data.auth_token,
+      auth_token: response.auth_token,
     });
   } catch (error: any) {
-    console.error("Error fetching Teamup auth token:", error.message);
+    console.log("error in getTeamupAuth()");
     res.status(500).json({ error: error.message });
   }
 };

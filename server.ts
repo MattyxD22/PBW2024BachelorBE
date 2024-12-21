@@ -8,9 +8,9 @@ import session from "express-session";
 dotenv.config();
 
 // Importer routes
-import clickupRoutes from "./routes/clickupRoute";
-import teamupRoutes from "./routes/teamupRoute";
-import globalRoutes from "./routes/globalRoute";
+import clickupRoutes from "./routes/clickup.route";
+import teamupRoutes from "./routes/teamup.route";
+import globalRoutes from "./routes/global.route";
 
 // Opretter express applikation og accepterer forespørgsler fra andre domæner
 const app = express();

@@ -29,47 +29,50 @@ export const extractTrackedTimeInfo = (timeEntry: any) => {
   if (!timeEntry || !timeEntry.intervals || timeEntry.intervals.length === 0)
     return null;
 
-  // Beregn samlet brugt tid i timer og minutter
-  const totalMinutes = Math.floor(timeEntry.time / 60000); // Konverter ms til minutter
+  // Calculate total time spent in hours and minutes
+  const totalMinutes = Math.floor(timeEntry.time / 60000); // Convert ms to minutes
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
 
-  // Brug `date_added` fra det første interval som den loggede dato
+  // Use `date_added` from the first interval as the logged date
   const dateLogged = new Date(parseInt(timeEntry.intervals[0].date_added));
 
-  // Formater datoen
-  const options: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  };
-  const formattedDate = dateLogged.toLocaleString("en-US", options);
+  // Convert the date to ISO format
+  const isoDate = dateLogged.toISOString();
 
   return {
     taskHours: hours,
     taskMinutes: minutes,
-    formattedDate: formattedDate,
-    dateLogged: timeEntry.intervals[0].date_added,
+    formattedDate: isoDate, // Return the ISO format date instead of formatted string
+    dateLogged: timeEntry.intervals[0].date_added, // Original date_added (timestamp)
     loggedBy: timeEntry.user.email,
     taskTitle: timeEntry.title,
   };
 };
-
-export const formatDateForAccess = (date: string): string => {
+export const formatDateForAccess = (
+  date: string | Date
+): { isoDate: string; isoTime: string } => {
   const d = new Date(date);
-  return `#${d.getFullYear()}-${(d.getMonth() + 1)
+
+  // Ensure the date is valid
+  if (isNaN(d.getTime())) {
+    throw new Error(`Invalid date: ${date}`);
+  }
+
+  // Format the date as #YYYY-MM-DD#
+  const isoDate = `#${d.getFullYear()}-${(d.getMonth() + 1)
     .toString()
-    .padStart(2, "0")}-${d.getDate().toString().padStart(2, "0")} ${d
-    .getHours()
+    .padStart(2, "0")}-${d.getDate().toString().padStart(2, "0")}#`;
+
+  // Format the time as #HH:MM:SS#
+  const isoTime = `#${d.getHours().toString().padStart(2, "0")}:${d
+    .getMinutes()
     .toString()
-    .padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}:${d
-    .getSeconds()
-    .toString()
-    .padStart(2, "0")}#`;
+    .padStart(2, "0")}:${d.getSeconds().toString().padStart(2, "0")}#`;
+
+  return { isoDate, isoTime };
 };
+
 module.exports = {
   getCurrentWeek,
   extractTrackedTimeInfo,
