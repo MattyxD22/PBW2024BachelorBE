@@ -1,9 +1,9 @@
 import fetch from "node-fetch";
-const CLICKUP_API_TOKEN = process.env.clickup as string;
+const CLICKUP_API_TOKEN = process.env.CLICKUP_API as string;
 
 export const fetchClickupTasksFromList = async () => {
   try {
-    const url = `${process.env.clickupUrl}v2/list/${process.env.CLICKUP_LISTID}/task`;
+    const url = `${process.env.CLICKUP_URL}v2/list/${process.env.CLICKUP_LISTID}/task`;
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -26,7 +26,7 @@ export const fetchClickupTasksFromList = async () => {
 
 export const fetchClickupListUsers = async () => {
   try {
-    const url = `${process.env.clickupUrl}v2/list/${process.env.CLICKUP_LISTID}/member`;
+    const url = `${process.env.CLICKUP_URL}v2/list/${process.env.CLICKUP_LISTID}/member`;
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -42,48 +42,48 @@ export const fetchClickupListUsers = async () => {
   } catch (error: any) {}
 };
 
-export const fetchClickupSingleTask = async (taskID: string) => {
-  try {
-    const url = `${process.env.clickupUrl}v2/task/${taskID}`;
+// export const fetchClickupSingleTask = async (taskID: string) => {
+//   try {
+//     const url = `${process.env.clickupUrl}v2/task/${taskID}`;
 
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        Authorization: CLICKUP_API_TOKEN,
-        "Content-Type": "application/json",
-      },
-    });
+//     const response = await fetch(url, {
+//       method: "GET",
+//       headers: {
+//         Authorization: CLICKUP_API_TOKEN,
+//         "Content-Type": "application/json",
+//       },
+//     });
 
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status} ${response.statusText}`);
-    }
+//     if (!response.ok) {
+//       throw new Error(`Error: ${response.status} ${response.statusText}`);
+//     }
 
-    return response.json();
-  } catch (error: any) {}
-};
+//     return response.json();
+//   } catch (error: any) {}
+// };
 
-export const fetchClickupTaskWithTrackedTime = async (taskID: string) => {
-  try {
-    const url = `${process.env.clickupUrl}v2/task/${taskID}`;
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        Authorization: CLICKUP_API_TOKEN,
-        "Content-Type": "application/json",
-      },
-    });
+// export const fetchClickupTaskWithTrackedTime = async (taskID: string) => {
+//   try {
+//     const url = `${process.env.clickupUrl}v2/task/${taskID}`;
+//     const response = await fetch(url, {
+//       method: "GET",
+//       headers: {
+//         Authorization: CLICKUP_API_TOKEN,
+//         "Content-Type": "application/json",
+//       },
+//     });
 
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status} ${response.statusText}`);
-    }
+//     if (!response.ok) {
+//       throw new Error(`Error: ${response.status} ${response.statusText}`);
+//     }
 
-    return response.json();
-  } catch (error: any) {}
-};
+//     return response.json();
+//   } catch (error: any) {}
+// };
 
 export const fetchTaskTimeEntries = async (taskID: string) => {
   try {
-    const url = `${process.env.clickupUrl}v2/task/${taskID}/time`;
+    const url = `${process.env.CLICKUP_URL}v2/task/${taskID}/time`;
     const response = await fetch(url, {
       method: "GET",
       headers: {

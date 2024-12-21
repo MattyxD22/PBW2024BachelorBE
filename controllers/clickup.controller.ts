@@ -54,34 +54,34 @@ export const getClickupListUsers = async (req: any, res: any) => {
   }
 };
 
-// Henter en enkelt opgave ud fra taskID
-export const getClickupSingleTask = async (req: any, res: any) => {
-  try {
-    const data = await clickupService.fetchClickupSingleTask(req.params.taskID);
-    res.status(200).json(data);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-};
+// // Henter en enkelt opgave ud fra taskID
+// export const getClickupSingleTask = async (req: any, res: any) => {
+//   try {
+//     const data = await clickupService.fetchClickupSingleTask(req.params.taskID);
+//     res.status(200).json(data);
+//   } catch (error: any) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
 
-// Henter opgaver med tid
-export const getClickupTaskWithTrackedTime = async (req: any, res: any) => {
-  try {
-    const data = await clickupService.fetchClickupTaskWithTrackedTime(
-      req.params.taskID
-    );
+// // Henter opgaver med tid
+// export const getClickupTaskWithTrackedTime = async (req: any, res: any) => {
+//   try {
+//     const data = await clickupService.fetchClickupTaskWithTrackedTime(
+//       req.params.taskID
+//     );
 
-    const trackedTimeInfo = extractTrackedTimeInfo(data);
+//     const trackedTimeInfo = extractTrackedTimeInfo(data);
 
-    // Retunere info om tiden sammen med selve opgaven
-    res.status(200).json({
-      task: data,
-      trackedTimeInfo,
-    });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-};
+//     // Retunere info om tiden sammen med selve opgaven
+//     res.status(200).json({
+//       task: data,
+//       trackedTimeInfo,
+//     });
+//   } catch (error: any) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
 
 // Henter tiden for en specifik opgave
 const getTaskTimeEntries = async (taskID: string) => {

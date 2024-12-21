@@ -37,6 +37,7 @@ export const sendQuery = async (query: string) => {
     await connection.close();
     return result;
   } catch (error: any) {
-    throw new Error(error.message);
+    console.log("query error: ", error);
+    throw new Error(error);
   }
 };

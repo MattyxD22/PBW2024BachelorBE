@@ -7,12 +7,12 @@ export const fetchTeamupUserEvents = async (
 ) => {
   try {
     // Henter events fra specifik kalender, identificeret ved TEAMUP_CALENDARID, baseret på mail, startDate og endDate
-    const url = `${process.env.teamupUrl}${process.env.TEAMUP_CALENDARID}/events?query=${email}&startDate=${startDate}&endDate=${endDate}`;
+    const url = `${process.env.TEAMUP_URL}${process.env.TEAMUP_CALENDARID}/events?query=${email}&startDate=${startDate}&endDate=${endDate}`;
 
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        "Teamup-Token": process.env.teamup as string,
+        "Teamup-Token": process.env.TEAMUP_API as string,
         Authorization: `Bearer ${process.env.TEAMUP_AUTH as string}`,
         "Content-Type": "application/json",
       },
@@ -34,11 +34,11 @@ export const fetchTeamupUserEvents = async (
 
 export const fetchTeamupUsers = async (calendarId: string) => {
   try {
-    const url = `${process.env.teamupUrl}${calendarId}/users`;
+    const url = `${process.env.TEAMUP_URL}${calendarId}/users`;
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        "Teamup-Token": process.env.teamup as string,
+        "Teamup-Token": process.env.TEAMUP_API as string,
         Authorization: `Bearer ${process.env.TEAMUP_AUTH as string}`,
         "Content-Type": "application/json",
       },
@@ -63,12 +63,12 @@ export const fetchTeamupUsers = async (calendarId: string) => {
 
 export const fetchTeamupSubCalendars = async () => {
   try {
-    const url = `${process.env.teamupUrl}${process.env.TEAMUP_CALENDARID}/subcalendars`;
+    const url = `${process.env.TEAMUP_URL}${process.env.TEAMUP_CALENDARID}/subcalendars`;
 
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        "Teamup-Token": process.env.teamup as string,
+        "Teamup-Token": process.env.TEAMUP_API as string,
         Authorization: `Bearer ${process.env.TEAMUP_AUTH as string}`,
         "Content-Type": "application/json",
       },
@@ -92,14 +92,14 @@ export const fetchTeamupSubCalendars = async () => {
 
 export const fetchTeamupAuth = async () => {
   try {
-    const url = `${process.env.teamupUrl}auth/tokens`;
-    const teamup_api = process.env.teamup as string;
+    const url = `${process.env.TEAMUP_URL}auth/tokens`;
+    const teamup_api = process.env.TEAMUP_API as string;
 
     const bodyObj = JSON.stringify({
-      email: process.env.teamup_email as string,
-      password: process.env.teamup_pass as string,
+      email: process.env.TEAMUP_USER as string,
+      password: process.env.TEAMUP_PASS as string,
     });
-
+    
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -116,8 +116,7 @@ export const fetchTeamupAuth = async () => {
     return response.json();
   } catch (error: any) {
     return {
-      statusText:
-        "Something went wrong when fetching from fetchTeamupSubCalendars",
+      statusText: "Something went wrong when authenticaing teamup",
       error: error.message,
       ok: false,
       status: 500,
