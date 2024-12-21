@@ -1,7 +1,6 @@
 import * as globalService from "../services/global.service";
 import * as sqlString from "sqlstring";
 import { formatDateForAccess } from "../utils/helper-utils";
-import { query, response } from "express";
 
 // Function to update or insert data into MS Access
 const updateMSAccessDatabase = async (data: any) => {
