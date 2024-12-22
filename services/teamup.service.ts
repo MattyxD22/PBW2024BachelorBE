@@ -47,7 +47,6 @@ export const fetchTeamupUsers = async (calendarId: string) => {
     if (!response.ok) {
       throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
-
     return response.json();
   } catch (error: any) {
     console.log("err");
@@ -99,7 +98,7 @@ export const fetchTeamupAuth = async () => {
       email: process.env.TEAMUP_USER as string,
       password: process.env.TEAMUP_PASS as string,
     });
-    
+
     const response = await fetch(url, {
       method: "POST",
       headers: {

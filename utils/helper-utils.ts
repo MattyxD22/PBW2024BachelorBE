@@ -1,3 +1,5 @@
+import { fetchTaskTimeEntries } from "../services/clickup.service";
+
 // Funktion til at hente starten og slutningen af den nuværende uge
 export const getCurrentWeek = () => {
   const currentDate = new Date();
@@ -73,8 +75,20 @@ export const formatDateForAccess = (
   return { isoDate, isoTime };
 };
 
+// Henter tiden for en specifik opgave
+export const getTaskTimeEntries = async (taskID: string) => {
+  try {
+    const data = await fetchTaskTimeEntries(taskID);
+    return data.data || [];
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};
+
 module.exports = {
   getCurrentWeek,
   extractTrackedTimeInfo,
   formatDateForAccess,
+  getTaskTimeEntries,
 };

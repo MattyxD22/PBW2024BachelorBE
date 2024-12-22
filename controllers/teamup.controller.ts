@@ -1,6 +1,5 @@
 import * as teamupService from "../services/teamup.service";
 import { getCurrentWeek } from "../utils/helper-utils";
-import session from "express-session";
 
 export const getTeamupUserEvents = async (req: any, res: any) => {
   const email = req.params.email;
