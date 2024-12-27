@@ -92,7 +92,43 @@ describe("ClickUp og Teamup tests", () => {
     expect(memberExists).toBe(false);
   });
 
-  // ------------------------------------ TeamUp Tests ------------------------------------
+
+it('Should return a singe task with tracked time', async () => {
+    const response = await request(app).get('/api/clickup/getSingleTaskTrackedTime/86969tc88');
+    console.log(response.body);
+
+    expect(response.status).toBe(200);
+
+    expect(response.body).toHaveProperty('task');
+    expect(response.body).toHaveProperty('trackedTimeInfo');
+
+    const task = response.body.task;
+    expect(task).toHaveProperty('id');
+    expect(task).toHaveProperty('name');
+
+    if (task.description) {
+        expect(typeof task.description).toBe('string');
+    }
+})
+
+it('should return 401 if the ClickUp API token is incorrect', async () => {
+    process.env.CLICKUP_API_TOKEN = 'invalid-token';
+    
+    const response = await request(app).get('/api/clickup/getSingleTaskTrackedTime/86969tc88');
+    
+    expect(response.status).toBe(401); 
+    expect(response.body).toHaveProperty('error', 'Authentication failed');
+  });
+
+
+
+
+
+
+
+
+
+// ------------------------------------ TeamUp Tests ------------------------------------
 
   it("should return an array of events when authenticated", async () => {
     // Use the token to make a request for user events
