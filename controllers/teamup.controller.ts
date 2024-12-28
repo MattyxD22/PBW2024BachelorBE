@@ -20,10 +20,6 @@ export const getTeamupUserEvents = async (req: any, res: any) => {
 
     // Henter data fra API'et og mapper events til et nyt format med relevante oplysninger
     const data = await response;
-    // hvis der er en fejl, check om data objektet har en "ok" property og i så fald, se om den er false
-    if (data.error) {
-      throw new Error(`Error: ${data.status} ${data.statusText}`);
-    }
 
     const userEvents = data.events.map((event: any) => {
       return {
@@ -38,7 +34,7 @@ export const getTeamupUserEvents = async (req: any, res: any) => {
         custom: event.custom,
       };
     });
-    
+
     res.status(200).json(userEvents);
   } catch (error: any) {
     console.error("Error fetching events:", error.message);
@@ -51,10 +47,6 @@ export const getTeamupUsers = async (req: any, res: any) => {
   try {
     // Henter den alle brugere og mapper dem til nyt format med array for email og navn
     const data = await teamupService.fetchTeamupUsers(req.params.calendarId);
-
-    if (data.error) {
-      throw new Error(`Error: ${data.status} ${data.statusText}`);
-    }
 
     const users = data.users.map((user: any) => {
       return {
@@ -74,10 +66,6 @@ export const getTeamupUsers = async (req: any, res: any) => {
 export const getTeamupSubcalenders = async (req: any, res: any) => {
   try {
     const data = await teamupService.fetchTeamupSubCalendars();
-
-    if (data.error) {
-      throw new Error(`Error: ${data.status} ${data.statusText}`);
-    }
 
     const subCalendars = data.subcalendars.map((calendar: any) => {
       return {

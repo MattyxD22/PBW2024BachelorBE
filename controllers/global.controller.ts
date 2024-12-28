@@ -19,14 +19,17 @@ import { fetchClickupTasksFromList } from "../services/clickup.service";
 // Function to update or insert data into MS Access
 export const updateMSAccessDatabase = async (data: any) => {
   try {
+    if (!data.length) {
+      throw new Error("No data");
+    }
     for (const record of data) {
       const safeEmail = sqlString.escape(record.userEmail);
       const safeUserName = sqlString.escape(record.userName);
-
       const userID = await getOrCreateUserID(safeEmail, safeUserName);
       const eventIDs = await handleUserEvents(userID, record.userEvents);
       await handleUserTasks(userID, eventIDs, record.userTasks);
     }
+    return "OK";
   } catch (error: any) {
     console.error("Error updating the database:", error.message);
     throw error;
@@ -42,7 +45,7 @@ export const getUserID = async (safeEmail: string) => {
     }
     return access[0].ID; // Return userID if exists
   } catch (error: any) {
-    console.log("error in function: getUserID()");
+    console.log(`Error in function getUserID(), email: ${safeEmail}`, error);
     throw new Error(error.message);
   }
 };
@@ -161,24 +164,33 @@ export const insertEvent = async (
   safeSubCalendarName: string
 ): Promise<number> => {
   try {
+    // Insert the event into the database
     const insertEventQuery = `
-    INSERT INTO userEvents (userID, startDate, startTime, endDate, endTime, eventHours, subCalendarName) 
-    VALUES (
-      ${userID}, 
-      ${isoStartDate}, 
-      ${isoStartTime}, 
-      ${isoEndDate}, 
-      ${isoEndTime}, 
-      ${sqlString.escape(eventHours)}, 
-      ${safeSubCalendarName}
-    )
-  `;
-    const result: any = await globalService.sendQuery(insertEventQuery);
-    console.log(result.insertId);
+      INSERT INTO userEvents (userID, startDate, startTime, endDate, endTime, eventHours, subCalendarName) 
+      VALUES (
+        ${userID}, 
+        ${isoStartDate}, 
+        ${isoStartTime}, 
+        ${isoEndDate}, 
+        ${isoEndTime}, 
+        ${sqlString.escape(eventHours)}, 
+        ${safeSubCalendarName}
+      )
+    `;
+    await globalService.sendQuery(insertEventQuery);
 
-    return result.insertId;
+    // Get the last inserted ID from MS Access using SELECT @@IDENTITY
+    const lastInsertIdQuery = `SELECT MAX(ID) AS LastID FROM userEvents`;
+
+    const result: any = await globalService.sendQuery(lastInsertIdQuery);
+
+    if (result && result.length > 0 && result[0].LastID) {
+      return result[0].LastID;
+    } else {
+      throw new Error("Unable to retrieve insert ID from MS Access");
+    }
   } catch (error: any) {
-    console.log("Error in insertEvent()");
+    console.log("Error in insertEvent():", error);
     throw new Error(error);
   }
 };
@@ -401,9 +413,7 @@ export const updateFromScheduler = async () => {
 
 export const exportCSV = async (req: any, res: any) => {
   try {
-    let jsonData = req.body;
-    await updateMSAccessDatabase(jsonData);
-
+    await updateMSAccessDatabase(req.body);
     res
       .status(200)
       .json({ Status: 200, Message: "Data successfully processed" });

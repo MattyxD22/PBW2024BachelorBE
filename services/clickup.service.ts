@@ -15,8 +15,13 @@ export const fetchClickupTasksFromList = async () => {
       throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
 
-    return response.json();
+    const data = response.json();
+    return data;
+
+    //return response.json();
   } catch (error: any) {
+    console.log(error);
+
     throw new Error("Error when fetching tasks from fetchClickupTasksList()");
   }
 };

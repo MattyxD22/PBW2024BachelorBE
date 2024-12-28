@@ -45,11 +45,15 @@ export const fetchTeamupUsers = async (calendarId: string) => {
     });
 
     if (!response.ok) {
+      console.log(
+        `something went wrong with request: Error: ${response.status} ${response.statusText}`
+      );
+
       throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
     return response.json();
   } catch (error: any) {
-    console.log("err");
+    console.error("error when calling fetchTeamupUsers() ", error);
 
     return {
       statusText: "Something went wrong when fetching from fetchTeamupUsers",
