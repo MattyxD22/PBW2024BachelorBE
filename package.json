@@ -19,6 +19,7 @@
     "node-fetch": "^2.7.0",
     "node-schedule": "^2.1.1",
     "nodemon": "^3.1.7",
+    "ts-node": "^10.9.2",
     "sqlstring": "^2.3.3"
   },
   "devDependencies": {
@@ -41,7 +42,6 @@
     "mocha": "^10.8.2",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
-    "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
     "odbc": "^2.4.9"
   }
