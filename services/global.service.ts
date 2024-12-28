@@ -1,4 +1,4 @@
-import * as odbc from "odbc";
+const odbc = require("odbc");
 
 export const sendQuery = async (query: string) => {
   try {
