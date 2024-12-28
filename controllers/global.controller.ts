@@ -17,7 +17,7 @@ import {
 import { fetchClickupTasksFromList } from "../services/clickup.service";
 
 // Function to update or insert data into MS Access
-const updateMSAccessDatabase = async (data: any) => {
+export const updateMSAccessDatabase = async (data: any) => {
   try {
     for (const record of data) {
       const safeEmail = sqlString.escape(record.userEmail);
@@ -33,7 +33,7 @@ const updateMSAccessDatabase = async (data: any) => {
   }
 };
 
-const getUserID = async (safeEmail: string) => {
+export const getUserID = async (safeEmail: string) => {
   try {
     const query = `SELECT ID FROM UserTable WHERE email = ${safeEmail}`;
     const access: any = await globalService.sendQuery(query);
@@ -47,7 +47,7 @@ const getUserID = async (safeEmail: string) => {
   }
 };
 
-const handleUserEvents = async (userID: number, userEvents: any[]) => {
+export const handleUserEvents = async (userID: number, userEvents: any[]) => {
   try {
     const eventIDs: any[] = [];
     for (const event of userEvents) {
@@ -95,7 +95,10 @@ const handleUserEvents = async (userID: number, userEvents: any[]) => {
   }
 };
 
-const checkIfEventExists = async (userID: number, safeStartDate: string) => {
+export const checkIfEventExists = async (
+  userID: number,
+  safeStartDate: string
+) => {
   try {
     const eventCheckQuery = `
       SELECT * FROM userEvents 
@@ -118,7 +121,7 @@ const checkIfEventExists = async (userID: number, safeStartDate: string) => {
   }
 };
 
-const updateEvent = async (
+export const updateEvent = async (
   userID: number,
   isoStartDate: string,
   isoStartTime: string,
@@ -148,7 +151,7 @@ const updateEvent = async (
   }
 };
 
-const insertEvent = async (
+export const insertEvent = async (
   userID: number,
   isoStartDate: string,
   isoStartTime: string,
@@ -171,14 +174,16 @@ const insertEvent = async (
     )
   `;
     const result: any = await globalService.sendQuery(insertEventQuery);
+    console.log(result.insertId);
+
     return result.insertId;
   } catch (error: any) {
     console.log("Error in insertEvent()");
-    throw new Error(error.message);
+    throw new Error(error);
   }
 };
 
-const handleUserTasks = async (
+export const handleUserTasks = async (
   userID: number,
   eventIDs: any[],
   userTasks: any[]
@@ -235,7 +240,10 @@ const handleUserTasks = async (
     throw new Error(error.message);
   }
 };
-const insertNewUser = async (safeEmail: string, safeUserName: string) => {
+export const insertNewUser = async (
+  safeEmail: string,
+  safeUserName: string
+) => {
   try {
     const insertUserQuery = `INSERT INTO UserTable (email, userName) VALUES (${safeEmail}, ${safeUserName})`;
     await globalService.sendQuery(insertUserQuery);
@@ -251,7 +259,10 @@ const insertNewUser = async (safeEmail: string, safeUserName: string) => {
   }
 };
 
-const checkIfTaskExists = async (userID: number, clickupTaskID: string) => {
+export const checkIfTaskExists = async (
+  userID: number,
+  clickupTaskID: string
+) => {
   try {
     const taskCheckQuery = `
       SELECT * FROM userTasks
@@ -268,12 +279,12 @@ const checkIfTaskExists = async (userID: number, clickupTaskID: string) => {
   }
 };
 
-const getOrCreateUserID = async (email: string, userName: string) => {
+export const getOrCreateUserID = async (email: string, userName: string) => {
   const userID = await getUserID(email);
   return userID ?? (await insertNewUser(email, userName));
 };
 
-const updateFromScheduler = async () => {
+export const updateFromScheduler = async () => {
   const calendarID = process.env.TEAMUP_CALENDARID as string;
 
   // Fetch TeamUp users
@@ -403,16 +414,20 @@ export const exportCSV = async (req: any, res: any) => {
 };
 
 // Job that repeats every 5 minutes
-const recurringJob = scheduler.scheduleJob("59 23 * * * *", async () => {
-  console.log("starting scheduler");
+export const recurringJob = scheduler.scheduleJob("59 23 * * * *", async () => {
+  try {
+    console.log("starting scheduler");
 
-  if (process.env.TEAMUP_AUTH === null || process.env.TEAMUP_AUTH === "") {
-    await fetchTeamupAuth().then((res) => {
-      process.env.TEAMUP_AUTH = res.auth_token;
-    });
+    if (process.env.TEAMUP_AUTH === null || process.env.TEAMUP_AUTH === "") {
+      await fetchTeamupAuth().then((res) => {
+        process.env.TEAMUP_AUTH = res.auth_token;
+      });
+    }
+
+    const data = await updateFromScheduler();
+    await updateMSAccessDatabase(data);
+    console.log("scheduler complete");
+  } catch (error) {
+    console.log("an error happened in the scheduler function: ", error);
   }
-
-  const data = await updateFromScheduler();
-  await updateMSAccessDatabase(data);
-  console.log("scheduler complete");
 });

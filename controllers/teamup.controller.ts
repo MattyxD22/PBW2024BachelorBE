@@ -38,7 +38,7 @@ export const getTeamupUserEvents = async (req: any, res: any) => {
         custom: event.custom,
       };
     });
-
+    
     res.status(200).json(userEvents);
   } catch (error: any) {
     console.error("Error fetching events:", error.message);

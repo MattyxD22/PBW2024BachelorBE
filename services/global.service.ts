@@ -1,9 +1,8 @@
 import * as odbc from "odbc";
 
-const DSN = "msAccess";
 export const sendQuery = async (query: string) => {
   try {
-    const connection = await odbc.connect(`DSN=${DSN}`);
+    const connection = await odbc.connect(`DSN=${process.env.DATABASE_DSN}`);
     const result = await connection.query(query);
     await connection.close();
     return result;

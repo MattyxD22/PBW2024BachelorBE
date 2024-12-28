@@ -1,5 +1,4 @@
 import fetch from "node-fetch";
-const CLICKUP_API_TOKEN = process.env.CLICKUP_API as string;
 
 export const fetchClickupTasksFromList = async () => {
   try {
@@ -7,7 +6,7 @@ export const fetchClickupTasksFromList = async () => {
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        Authorization: CLICKUP_API_TOKEN,
+        Authorization: process.env.CLICKUP_API as string,
         "Content-Type": "application/json",
       },
     });
@@ -15,8 +14,6 @@ export const fetchClickupTasksFromList = async () => {
     if (!response.ok) {
       throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
-
-    //console.log("! ", await response.json());
 
     return response.json();
   } catch (error: any) {
@@ -30,7 +27,7 @@ export const fetchClickupListUsers = async () => {
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        Authorization: CLICKUP_API_TOKEN,
+        Authorization: process.env.CLICKUP_API as string,
         "Content-Type": "application/json",
       },
     });
@@ -42,52 +39,13 @@ export const fetchClickupListUsers = async () => {
   } catch (error: any) {}
 };
 
-// export const fetchClickupSingleTask = async (taskID: string) => {
-//   try {
-//     const url = `${process.env.clickupUrl}v2/task/${taskID}`;
-
-//     const response = await fetch(url, {
-//       method: "GET",
-//       headers: {
-//         Authorization: CLICKUP_API_TOKEN,
-//         "Content-Type": "application/json",
-//       },
-//     });
-
-//     if (!response.ok) {
-//       throw new Error(`Error: ${response.status} ${response.statusText}`);
-//     }
-
-//     return response.json();
-//   } catch (error: any) {}
-// };
-
-// export const fetchClickupTaskWithTrackedTime = async (taskID: string) => {
-//   try {
-//     const url = `${process.env.clickupUrl}v2/task/${taskID}`;
-//     const response = await fetch(url, {
-//       method: "GET",
-//       headers: {
-//         Authorization: CLICKUP_API_TOKEN,
-//         "Content-Type": "application/json",
-//       },
-//     });
-
-//     if (!response.ok) {
-//       throw new Error(`Error: ${response.status} ${response.statusText}`);
-//     }
-
-//     return response.json();
-//   } catch (error: any) {}
-// };
-
 export const fetchTaskTimeEntries = async (taskID: string) => {
   try {
     const url = `${process.env.CLICKUP_URL}v2/task/${taskID}/time`;
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        Authorization: CLICKUP_API_TOKEN,
+        Authorization: process.env.CLICKUP_API as string,
         "Content-Type": "application/json",
       },
     });

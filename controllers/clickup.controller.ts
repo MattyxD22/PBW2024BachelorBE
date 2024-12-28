@@ -35,6 +35,10 @@ export const getClickUpTasksFromList = async (req: any, res: any) => {
           })
       )
     ).flat(); // Flader alle tidsregistreringer ud i én liste
+    if (!userTrackedTime.length) {
+      throw new Error(`No Tasks found for email: ${userEmail}`);
+    }
+
     res.status(200).json(userTrackedTime);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
