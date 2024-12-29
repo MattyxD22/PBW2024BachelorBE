@@ -28,8 +28,11 @@ app.use(
 );
 app.use(
   cors({
-    origin: "http://localhost:4200",
-    credentials: true, // Allow cookies to be sent
+    origin:
+      process.env.NODE_ENV === "production"
+        ? "https://pbw2024bachelorfe.onrender.com" 
+        : "http://localhost:4200", 
+    credentials: true,
   })
 );
 app.use(cookieParser());
